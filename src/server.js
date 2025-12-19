@@ -1,6 +1,12 @@
 const http=require('http');
+const db=require('./config/database');
 
-const server=http.createServer((req,res)=>{
+
+const server=http.createServer( async (req,res)=>{
+    const getNotes=async ()=>{
+        const result=await db.query('SELECT * FROM notes');
+        return result.rows;
+    };
     const basedUrl=`http://${req.headers.host}`;
     const parsedUrl=new URL(req.url,basedUrl);
     let path=parsedUrl.pathname;
@@ -12,9 +18,17 @@ const server=http.createServer((req,res)=>{
         res.statusCode=200;
         res.end(JSON.stringify({message:'API is running!'}));
     }
-    else if(path==='/api/notes' && req.method==='GET'){
-        res.statusCode=200;
-        res.end(JSON.stringify({message:'List notes endpoint'}));
+    else if (path === '/api/notes' && req.method === 'GET') {
+    try {
+        const rows = await getNotes();
+        res.statusCode = 200;
+        res.end(JSON.stringify(rows));
+    } catch (error) {
+        // Si la base de datos falla (como ahora), entramos aquí
+        console.error("Error en la DB:", error.message);
+        res.statusCode = 500;
+        res.end(JSON.stringify({ error: 'Internal Server Error', detail: error.message }));
+    }
     }
     else if(path==='/api/notes' && req.method==='POST'){
         res.statusCode=201;
