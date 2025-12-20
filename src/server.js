@@ -1,47 +1,57 @@
 const http=require('http');
 const db=require('./config/database');
 
-
-const server=http.createServer( async (req,res)=>{
-    const getNotes=async ()=>{
-        const result=await db.query('SELECT * FROM notes');
-        return result.rows;
-    };
-    const basedUrl=`http://${req.headers.host}`;
-    const parsedUrl=new URL(req.url,basedUrl);
-    let path=parsedUrl.pathname;
-    if (parsedUrl.pathname.length > 1 && parsedUrl.pathname.endsWith('/')) {
-        path=path.slice(0, -1);
+const options={
+    HOST:'localhost',
+    PORT:3000
+};
+// Funciones auxiliares para manejar respuestas
+const responseSuccessfulServer=(res,statusCode,message)=>{
+    res.statusCode=statusCode;
+    typeof message==='string' ? res.end(JSON.stringify({message:message})) :  res.end(JSON.stringify(message));
+};
+const responseErrorServer=(res,statusCode,message)=>{
+    res.statusCode=statusCode;
+    res.end(JSON.stringify({error:message}));
+};
+// Normalizamos la ruta eliminando la barra final para que '/api/notes/' sea igual a '/api/notes'
+const parsedUrl=(req,basedUrl)=>{
+    let newUrl=new URL(req.url,basedUrl);
+    let path=newUrl.pathname;
+    if(newUrl.pathname.length>1 && newUrl.pathname.endsWith('/')){
+        path=path.slice(0,-1);
     }
+    return path;
+}
+
+const getALLNotes=async ()=>{
+    let queryResponse=await db.query('SELECT * FROM notes');
+    return queryResponse.rows;
+};
+const server=http.createServer( async (req,res)=>{
+    const path=parsedUrl(req,`http://${options.HOST}:${options.PORT}`);
+
     res.setHeader('Content-Type','application/json');
     if(path==='/' && req.method==='GET'){
-        res.statusCode=200;
-        res.end(JSON.stringify({message:'API is running!'}));
+        responseSuccessfulServer(res,200,'API is running!');
     }
     else if (path === '/api/notes' && req.method === 'GET') {
     try {
-        const rows = await getNotes();
-        res.statusCode = 200;
-        res.end(JSON.stringify(rows));
+        const rows = await getALLNotes();
+        responseSuccessfulServer(res, 200, rows);
     } catch (error) {
-        // Si la base de datos falla (como ahora), entramos aquí
         console.error("Error en la DB:", error.message);
-        res.statusCode = 500;
-        res.end(JSON.stringify({ error: 'Internal Server Error', detail: error.message }));
+        responseErrorServer(res, 500, error.message);
     }
     }
     else if(path==='/api/notes' && req.method==='POST'){
-        res.statusCode=201;
-        res.end(JSON.stringify({message:'Create note endpoint'}));
+        responseSuccessfulServer(res,201,'Create note Endpoint');
     }
     else{
-        res.statusCode=404;
-        res.end(JSON.stringify({message:'404 Not Found'}));
+        responseErrorServer(res,404,'404 Endpoint not found');
     }
 });
-const PORT=3000;
-const HOST='localhost';
 
-server.listen(PORT,HOST,()=>{
-    console.log(`Server running at http://${HOST}:${PORT}/`);
+server.listen(options.PORT,options.HOST,()=>{
+    console.log(`Server running at http://${options.HOST}:${options.PORT}/`);
 });
