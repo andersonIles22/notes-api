@@ -25,9 +25,13 @@ const parsedUrl=(req,basedUrl)=>{
 }
 
 const getALLNotes=async ()=>{
-    let queryResponse=await db.query('SELECT * FROM notes');
+    const queryResponse=await db.query('SELECT * FROM notes');
     return queryResponse.rows;
 };
+const getSpecificNotes=async (id)=>{
+    const queryReponse=await db.query('SELECT * FROM notes WHERE id=$1',[id]);
+    return queryReponse.rows;
+}
 const server=http.createServer( async (req,res)=>{
     const path=parsedUrl(req,`http://${options.HOST}:${options.PORT}`);
 
@@ -43,6 +47,23 @@ const server=http.createServer( async (req,res)=>{
         console.error("Error en la DB:", error.message);
         responseErrorServer(res, 500, error.message);
     }
+    }
+    else if(path.startsWith('/api/notes/')&& req.method==='GET'){
+        const getId=path.split('/')[3];
+        console.log(getId)
+        if(!getId || getId.trim()===""||isNaN(getId)){
+            return responseErrorServer(res,400,"Formato de Id Invalido");
+        }
+        try{
+            const rows= await getSpecificNotes(getId);
+            if (rows.length===0){
+                return responseErrorServer(res,404,"Nota no encontrada")
+            }
+            responseSuccessfulServer(res,200, rows[0])
+
+        }catch(error){
+            responseErrorServer(res, 500, error.message)
+        }
     }
     else if(path==='/api/notes' && req.method==='POST'){
             let body='';
