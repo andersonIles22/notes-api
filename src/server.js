@@ -48,9 +48,8 @@ const server=http.createServer( async (req,res)=>{
         responseErrorServer(res, 500, error.message);
     }
     }
-    else if(path.startsWith('/api/notes/')&& req.method==='GET'){
+    else if(path.startsWith('/api/notes/') && req.method==='GET'){
         const getId=path.split('/')[3];
-        console.log(getId)
         if(!getId || getId.trim()===""||isNaN(getId)){
             return responseErrorServer(res,400,"Formato de Id Invalido");
         }
@@ -88,6 +87,39 @@ const server=http.createServer( async (req,res)=>{
                     responseErrorServer(res,500,error.message);
                 }
                 });
+    }
+    else if (path.startsWith('/api/notes/') && req.method==='PUT'){
+        const getId= path.split('/')[3];
+        if(!getId || getId.trim()===""||isNaN(getId)){
+            return responseErrorServer(res,400,"Formato de Id Invalido");
+        }
+        let newBody='';
+        req.on('data',chunk=>{
+            newBody+=chunk.toString();
+        });
+        req.on('end',async ()=> {
+            try{
+                newBody=JSON.parse(newBody);
+            }catch(error){
+                return responseErrorServer(res,400,"JSON inválido en el cuerpo de la solicitud")
+            }
+            const {title}=newBody;
+            if(title!==undefined){
+                if (title.trim()===''||title.length>200){
+                    return responseErrorServer(res,400, "El campo Title debe ser válido y menos de máximo 200 caracteres");
+                }
+            }
+            try {
+                const queryUpdate= await db.query('UPDATE notes SET title=COALESCE ($1,title), content=COALESCE($2,content), updated_at=NOW() WHERE id=$3 RETURNING *',[newBody.title || null,newBody.content || null,getId]);
+                if (queryUpdate.rowCount===0){
+                    return responseErrorServer(res,404," El id establecido no se encuentra")
+                }
+                responseSuccessfulServer(res,200,queryUpdate.rows[0])
+            }catch(error){
+                responseErrorServer(res,500,error.message)
+            }
+        });
+
     }
     else{
         responseErrorServer(res,404,'404 Endpoint not found');
