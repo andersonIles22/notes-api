@@ -45,7 +45,28 @@ const server=http.createServer( async (req,res)=>{
     }
     }
     else if(path==='/api/notes' && req.method==='POST'){
-        responseSuccessfulServer(res,201,'Create note Endpoint');
+            let body='';
+            req.on('data',chunk=>{
+                body+=chunk.toString();
+            });
+            req.on('end',async ()=>{
+                try{
+                    body=JSON.parse(body);
+                } catch(error){
+                    return responseErrorServer(res,400,'JSON inválido en el cuerpo de la solicitud');
+                }
+                const {title,content}=body;
+                if(!title || title.trim()===''||title.length>200){
+                    return responseErrorServer(res,400,'El campo title es obligatorio y no debe exceder los 200 caracteres');
+                }
+                try{
+                    const queryRequest= await db.query('INSERT INTO notes (title,content) VALUES ($1,$2) RETURNING *',[title,content]);
+                    responseSuccessfulServer(res,201,queryRequest.rows[0]);    
+                } catch(error){
+                    console.error('Error en la DB:',error.message);
+                    responseErrorServer(res,500,error.message);
+                }
+                });
     }
     else{
         responseErrorServer(res,404,'404 Endpoint not found');
@@ -55,3 +76,5 @@ const server=http.createServer( async (req,res)=>{
 server.listen(options.PORT,options.HOST,()=>{
     console.log(`Server running at http://${options.HOST}:${options.PORT}/`);
 });
+
+
