@@ -178,12 +178,9 @@ const getScore= async (score,timeResolved,nameStudent)=>{
 }
 //          Función para ejecutar la revisión final 
 const getReview= async ()=>{
-    const studentOne= getScore(students[0].score,students[0].timeResolved,students[0].fullName);
-    const studentTwo= getScore(students[1].score,students[1].timeResolved,students[1].fullName);
-    const studentThree= getScore(students[2].score,students[2].timeResolved,students[2].fullName);
-    const studentFour= getScore(students[3].score,students[3].timeResolved,students[3].fullName);
+    const promisesStudents= students.map(student=>getScore(student.score,student.timeResolved,student.fullName));
     try {
-        const result=await Promise.allSettled([studentOne,studentTwo,studentThree,studentFour]);
+        const result=await Promise.allSettled(promisesStudents);
         console.log(result);
         console.log("Todos los estudiantes han sido evaluados");
     }
