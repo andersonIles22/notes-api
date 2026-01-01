@@ -89,26 +89,32 @@ const server=http.createServer( async (req,res)=>{
                 });
     }
     else if (path.startsWith('/api/notes/') && req.method==='PUT'){
+        // Realizamos la validación de que el id sea solo un numero
         const getId= path.split('/')[3];
         if(!getId || getId.trim()===""||isNaN(getId)){
             return responseErrorServer(res,400,"Formato de Id Invalido");
         }
+        // De manera asincrona establecemos que se reciba los chunks del request JSON
         let newBody='';
         req.on('data',chunk=>{
             newBody+=chunk.toString();
         });
+        // Inicio del manejo de los chunks
         req.on('end',async ()=> {
+                // Parseamos el formato del cuerpo JSON recibido
             try{
                 newBody=JSON.parse(newBody);
             }catch(error){
                 return responseErrorServer(res,400,"JSON inválido en el cuerpo de la solicitud")
             }
+                // Validamos  que el campo title sea caracteres validos y un maximo de 200 caracteres
             const {title}=newBody;
             if(title!==undefined){
                 if (title.trim()===''||title.length>200){
                     return responseErrorServer(res,400, "El campo Title debe ser válido y menos de máximo 200 caracteres");
                 }
             }
+                //Gestión de la consulta a la db
             try {
                 const queryUpdate= await db.query('UPDATE notes SET title=COALESCE ($1,title), content=COALESCE($2,content), updated_at=NOW() WHERE id=$3 RETURNING *',[newBody.title || null,newBody.content || null,getId]);
                 if (queryUpdate.rowCount===0){
@@ -119,6 +125,28 @@ const server=http.createServer( async (req,res)=>{
                 responseErrorServer(res,500,error.message)
             }
         });
+
+    }
+    else if(path.startsWith('/api/notes/') && req.method==='DELETE'){
+        //  Validamos que el id exista y sea un numero
+        const getID= path.split('/')[3];
+        if(!getID || getID.trim()==='' || isNaN(getID)){
+            return responseErrorServer(res, 400, "Formato ID invalido")
+        }
+        // Gestionamos la eliminacion del registro en la bd
+        try{
+            const queryDetele=await db.query('DELETE FROM notes WHERE id=$1 RETURNING *',[getID]);
+            if(queryDetele.rowCount===0){
+                return responseErrorServer(res, 404, "El Id establecido no existe")
+            }
+            const customResponse={
+                message:"Eliminación de nota exitosa",
+                deletedNote:queryDetele.rows[0]
+            };
+            responseSuccessfulServer(res,200,customResponse)
+        }catch(error){
+            responseErrorServer(res,500, error.message)
+        }
 
     }
     else{
