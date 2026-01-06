@@ -3,8 +3,8 @@ const {handleNotesRoutes}=require('./routes/notesRoutes');
 const {successResponse,errorResponse}=require('./utils/response');
 
 const options={
-    HOST:'localhost',
-    PORT:3000
+    HOST:'127.0.0.1',
+    PORT:process.env.PORT||3000
 };
 // Función del servidor
 const server=http.createServer( async (req,res)=>{
