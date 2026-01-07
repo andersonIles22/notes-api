@@ -8,19 +8,23 @@ const getAllNotes=async (req,res,next)=>{
         next(error)
     }
 };
-const getSpecificNotes=async (res,pathParts)=>{
-    const id=pathParts[2];
+const getSpecificNotes=async (req,res,next)=>{
+    const id=req.params.id
     if(!/^\d+$/.test(id)){
-        return res.status(400).json("Formato de Id invalido");
+        const error=new Error('Valor id invalido');
+        error.status=400;
+        return next(error);
     }
     try {
         const queryReponse=await db.query('SELECT * FROM notes WHERE id=$1',[id]);
         if(queryReponse.rows.length===0){
-            return res.status(404).json('No encontrado');
+            const error=new Error('No encontrado');
+            error.status=404;
+            return next(error);
         }
         res.status(200).json(queryReponse.rows[0]);
     } catch (error) {
-        res.status(500).json(error.message);
+        next(error);
     }
 };
 const createNote=async(req,res,next)=>{

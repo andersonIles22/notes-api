@@ -10,10 +10,17 @@ app.use(express.json())
 app.get('/',(req,res)=>{
     res.json({result:'waos'})
 });
+// Obtener todas los registros de la ruta
 app.get('/api/notes',(req, res,next)=>{
     notesController.getAllNotes(req,res,next);
 });
 
+//Obtener registros de la ruta mediante id
+app.get('/api/notes/:id',(req,res,next)=>{
+    notesController.getNoteById(req,res,next);
+})
+
+// Insertar registros en la ruta
 app.post('/api/notes',(req,res,next)=>{
     notesController.createNote(req,res,next);
 });
