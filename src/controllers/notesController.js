@@ -1,53 +1,44 @@
 const db=require('../config/database');
-const {successResponse,errorResponse}=require('../utils/response')
 
-const getALLNotes=async (req,res)=>{
-    const url=req.url;
+const getAllNotes=async (req,res,next)=>{
     try {
-        const queryResponse=await db.query('SELECT * FROM notes');
-        successResponse(res, 200, queryResponse.rows);
+        const queryResponse=await db.query('SELECT * FROM notes ORDER BY created_at DESC');
+        res.status(200).json(queryResponse.rows)
     } catch (error) {
-        errorResponse(res, 500, error.message);
+        next(error)
     }
 };
 const getSpecificNotes=async (res,pathParts)=>{
     const id=pathParts[2];
     if(!/^\d+$/.test(id)){
-        return errorResponse(res,400,"Formato de Id invalido")
+        return res.status(400).json("Formato de Id invalido");
     }
     try {
         const queryReponse=await db.query('SELECT * FROM notes WHERE id=$1',[id]);
         if(queryReponse.rows.length===0){
-            return errorResponse(res,404, "Nota no encontrada")
+            return res.status(404).json('No encontrado');
         }
-        successResponse(res,200,queryReponse.rows[0])
+        res.status(200).json(queryReponse.rows[0]);
     } catch (error) {
-        errorResponse(res,500,error.message)
+        res.status(500).json(error.message);
     }
 };
-const createNote=async(req,res)=>{
-    let body='';
-    req.on('data',chunk=>{
-        body+=chunk.toString();
-    });
-    req.on('end',async ()=>{
-        try{
-            body=JSON.parse(body);
-        } catch(error){
-            return errorResponse(res,400,'JSON inválido en el cuerpo de la solicitud');
-        }
-        const {title,content}=body;
-        if(!title || title.trim()===''||title.length>200){
-            return errorResponse(res,400,'El campo title es obligatorio y no debe exceder los 200 caracteres');
-        }
-        try{
-            const queryInsert= await db.query('INSERT INTO notes (title,content) VALUES ($1,$2) RETURNING *',[title,content]);
-            successResponse(res,201,queryInsert.rows[0]);    
-        } catch(error){
-            errorResponse(res,500,error.message);
-        }
-        });
+const createNote=async(req,res,next)=>{
+    const {title,content}=req.body;
+    if(!title||title.trim()===''||title.length>200){
+        const error= new Error('El campo title es obligatorio y no debe exceder los 200 caracteres');
+        error.status=400;
+        return next(error);
+    }
+    try{
+        const queryInsert= await db.query('INSERT INTO notes (title,content) VALUES ($1,$2) RETURNING *',[title,content]);
+        res.status(201).json(queryInsert.rows[0])    
+    } catch(error){
+        error.status=500;
+        next(error);
+    }
 };
+/*
 const updateNote=async(req,res,pathParts)=>{
     // Parseamos el id
     const id=pathParts[2];
@@ -106,11 +97,12 @@ const deleteNote=async (res,pathParts)=>{
         errorResponse(res,500, error.message)
     }
 }
+*/
 
 module.exports={
-    getALLNotes,
+    getAllNotes,
     getNoteById:getSpecificNotes,
-    createNote,
-    updateNote,
-    deleteNote
+    createNote
+    //updateNote,
+    //deleteNote
 }
