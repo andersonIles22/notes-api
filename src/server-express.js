@@ -5,6 +5,8 @@ const options={
     host:'127.0.0.1',
     port:process.env.PORT||3000
 };
+
+
 app.use(express.json())
 
 app.get('/',(req,res)=>{
@@ -25,6 +27,26 @@ app.post('/api/notes',(req,res,next)=>{
     notesController.createNote(req,res,next);
 });
 
+// Actualizar registros en la ruta
+
+app.put('/api/notes/:id',(req,res,next)=>{
+    notesController.updateNote(req,res,next);
+})
+
+//Borrar registro en base al id
+
+app.delete('/api/notes/:id',(req,res,next)=>{
+    notesController.deleteNote(req,res,next);
+})
+
+// Captura de error en la ruta
+
+app.use((req,res,next)=>{
+    const error=new Error(`Ruta ${req.originalUrl} no encontrada, este wey`);
+    error.stack=404;
+    next(error);
+})
+// Manejo de error centralizado
 app.use((err,req,res,next)=>{
     const status=err.status||500;
     res.status(status).json({
