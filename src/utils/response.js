@@ -1,12 +1,12 @@
 const responseSuccessfulServer=(res,statusCode,message)=>{
-    res.statusCode=statusCode;
-    typeof message==='string' ? res.end(JSON.stringify({message:message})) :  res.end(JSON.stringify(message));
+    res.status(statusCode).json(message);
 };
-const responseErrorServer=(res,statusCode,message)=>{
-    res.statusCode=statusCode;
-    res.end(JSON.stringify({error:message}));
+const responseErrorServer=(statusCode,message,next)=>{
+    const error=new Error(message);
+    error.status=statusCode;
+    next(error);
 };
 module.exports={
     successResponse:responseSuccessfulServer,
-    errorResponse:responseErrorServer
+    error:responseErrorServer
 }

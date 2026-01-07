@@ -1,29 +1,60 @@
-const http=require('http');
-const {handleNotesRoutes}=require('./routes/notesRoutes');
-const {successResponse,errorResponse}=require('./utils/response');
-
+const express=require('express');
+const app= express();
+const notesController=require('./controllers/notesController');
 const options={
-    HOST:'127.0.0.1',
-    PORT:process.env.PORT||3000
+    host:'127.0.0.1',
+    port:process.env.PORT||3000
 };
-// Función del servidor
-const server=http.createServer( async (req,res)=>{
-    const url=new URL(req.url,`http://${options.HOST}:${options.PORT}`);
-    const pathParts=url.pathname.split('/').filter(Boolean);
-    res.setHeader('Content-Type','application/json');
-    if(req.url==='/'){
-        successResponse(res,200,'API is running!');
-        return;
-    }
-    if (pathParts[0]==='api' && pathParts[1]==='notes') {
-        await handleNotesRoutes(req,res,req.method,pathParts);
-        return;
-    }
-    return errorResponse(res,404,'404 Endpoint not found');
+
+
+app.use(express.json())
+
+app.get('/',(req,res)=>{
+    res.json({result:'waos'})
+});
+// Obtener todas los registros de la ruta
+app.get('/api/notes',(req, res,next)=>{
+    notesController.getAllNotes(req,res,next);
 });
 
-server.listen(options.PORT,options.HOST,()=>{
-    console.log(`Server running at http://${options.HOST}:${options.PORT}/`);
+//Obtener registros de la ruta mediante id
+app.get('/api/notes/:id',(req,res,next)=>{
+    notesController.getNoteById(req,res,next);
+})
+
+// Insertar registros en la ruta
+app.post('/api/notes',(req,res,next)=>{
+    notesController.createNote(req,res,next);
 });
 
+// Actualizar registros en la ruta
 
+app.put('/api/notes/:id',(req,res,next)=>{
+    notesController.updateNote(req,res,next);
+})
+
+//Borrar registro en base al id
+
+app.delete('/api/notes/:id',(req,res,next)=>{
+    notesController.deleteNote(req,res,next);
+})
+
+// Captura de error en la ruta
+
+app.use((req,res,next)=>{
+    const error=new Error(`Ruta ${req.originalUrl} no encontrada, este wey`);
+    error.stack=404;
+    next(error);
+})
+// Manejo de error centralizado
+app.use((err,req,res,next)=>{
+    const status=err.status||500;
+    res.status(status).json({
+        success:false,
+        message:err.message||'Bip, algo esta mal we',
+        code:'INTERNAL_ERROR'
+    })
+})
+app.listen(options.port, ()=>{
+    console.log('El servidor ya funca')
+})
