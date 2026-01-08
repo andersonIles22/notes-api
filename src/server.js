@@ -2,11 +2,13 @@ const express=require('express');
 const app= express();
 const notesController=require('./controllers/notesController');
 const {validateNotePost,validateNotePut,validateId}=require('./middleware/validation');
+const {errorHandler,error}=require('./middleware/errorHandlers');
+
+
 const options={
     host:'127.0.0.1',
     port:process.env.PORT||3000
 };
-
 
 app.use(express.json())
 
@@ -33,19 +35,11 @@ app.delete('/api/notes/:id',validateId,notesController.deleteNote);
 // Captura de error en la ruta
 
 app.use((req,res,next)=>{
-    const error=new Error(`Ruta ${req.originalUrl} no encontrada, este wey`);
-    error.stack=404;
-    next(error);
+    error(404,`Ruta ${req.originalUrl} no encontrada, pelele`,next);
 })
 // Manejo de error centralizado
-app.use((err,req,res,next)=>{
-    const status=err.status||500;
-    res.status(status).json({
-        success:false,
-        message:err.message||'Bip, algo esta mal we',
-        code:'INTERNAL_ERROR'
-    })
-})
+app.use(errorHandler)
+
 app.listen(options.port, ()=>{
     console.log('El servidor ya funca')
 })

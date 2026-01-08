@@ -60,7 +60,9 @@ next();
 ];
 // Validación del ID
 const validateId=[
-    param('id').isInt({min:1}).withMessage('Id debe ser positivo'),
+    param('id')
+    // Valida que el id sea si o si un entero positivo
+    .isInt({min:1}).withMessage('Id debe ser positivo'),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

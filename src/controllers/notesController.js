@@ -1,9 +1,10 @@
 const db=require('../config/database');
-const {successResponse,error}=require('../utils/response')
+const {successResponse}=require('../utils/successResponse');
+const {error}=require('../middleware/errorHandlers');
 const getAllNotes=async (req,res,next)=>{
     try {
         const queryResponse=await db.query('SELECT * FROM notes ORDER BY created_at DESC');
-        successResponse(res,400,queryResponse.rows);
+        successResponse(res,200,queryResponse.rows);
     } catch (error) {
         next(error)
     }
@@ -32,7 +33,6 @@ const createNote=async(req,res,next)=>{
 };
 
 const updateNote=async(req,res,next)=>{
-    //Validamos que el valor id es correcto
     const {id}=req.params;
     const {title}=req.body;
         // Gestión de la consulta a la db
@@ -47,7 +47,6 @@ const updateNote=async(req,res,next)=>{
     }
 }
 const deleteNote=async (req,res,next)=>{
-    //Parseamos el id
     const {id}=req.params;
     try{
         const queryDetele=await db.query('DELETE FROM notes WHERE id=$1 RETURNING *',[id]);
