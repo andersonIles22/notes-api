@@ -1,22 +1,24 @@
 const db=require('../config/database');
-const {successResponse}=require('../utils/successResponse');
+const {successGet,successPost,successPut,successDelete}=require('../utils/successResponses');
 const {error}=require('../middleware/errorHandlers');
+
+
 const getAllNotes=async (req,res,next)=>{
     try {
         const queryResponse=await db.query('SELECT * FROM notes ORDER BY created_at DESC');
-        successResponse(res,200,queryResponse.rows);
+        successGet(res,200,queryResponse.rows);
     } catch (error) {
         next(error)
     }
 };
-const getSpecificNotes=async (req,res,next)=>{
+const getNoteById=async (req,res,next)=>{
     const {id}=req.params;
     try {
         const queryReponse=await db.query('SELECT * FROM notes WHERE id=$1',[id]);
         if(queryReponse.rows.length===0){
         return error(404,'El id no existe',next);
         }
-        successResponse(res,200,queryReponse.rows[0]);
+        successGet(res,200,queryReponse.rows[0]);
     } catch (error) {
         next(error);
     }
@@ -25,7 +27,7 @@ const createNote=async(req,res,next)=>{
     const {title,content}=req.body;
     try{
         const queryInsert= await db.query('INSERT INTO notes (title,content) VALUES ($1,$2) RETURNING *',[title,content]);
-        successResponse(res,201,queryInsert.rows[0])  
+        successPost(res,201,queryInsert.rows[0])  
     } catch(error){
         error.status=500;
         next(error);
@@ -41,7 +43,7 @@ const updateNote=async(req,res,next)=>{
         if(queryUpdate.rowCount===0){
             return error(404,'Id no existente',next);
         }
-        successResponse(res,200,'Actualización Exitosa')
+        successPut(res,200,queryUpdate.rows[0])
     }catch(error){
         next(error);
     }
@@ -51,9 +53,9 @@ const deleteNote=async (req,res,next)=>{
     try{
         const queryDetele=await db.query('DELETE FROM notes WHERE id=$1 RETURNING *',[id]);
         if(queryDetele.rowCount===0){
-        return error(400,'Id no existente',next);
+        return error(404,'Id no existente',next);
         }
-        successResponse(res,200,'Eliminación existosa')
+        successDelete(res,200,queryDetele.rows[0])
     }catch(error){
         next(error);
     }
@@ -62,7 +64,7 @@ const deleteNote=async (req,res,next)=>{
 
 module.exports={
     getAllNotes,
-    getNoteById:getSpecificNotes,
+    getNoteById,
     createNote,
     updateNote,
     deleteNote

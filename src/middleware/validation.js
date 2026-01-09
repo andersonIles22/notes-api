@@ -21,11 +21,11 @@ const validateNotePost=[
                 errors: errors.array().map(err => ({
                 field: err.path,
                 message: err.msg
-        }))
-    });
-}
-next();
-}
+                }))
+             });
+        }
+        next();
+    }
 ];
 
 //Validación para solicitudes PUT
@@ -68,7 +68,7 @@ const validateId=[
     if (!errors.isEmpty()) {
       return res.status(400).json({ 
         success: false, 
-        error: 'Invalid ID format' 
+        error: 'Formato de ID inválido' 
       });
     }
     next();
