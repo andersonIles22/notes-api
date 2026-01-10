@@ -1,4 +1,10 @@
-  // Centralized Error Handler
+/**
+ * Error Middleware, Centralized Error Handler.
+ * @param {error} err -  Capture Error Object.
+ * @param {Object} req - request of Express.
+ * @param {Object} res  - response of Express.
+ * @param {Function} next  Relay Function
+ */
 const errorHandler=(err, req, res, next)=>{
   // si queremos mostrar la linea de codigo donde empieza a fallar
   //console.error('Error:', err.stack);
@@ -13,7 +19,12 @@ const errorHandler=(err, req, res, next)=>{
   });
 };
 
-// Error Handler
+/**
+ * Error Creator, We create an error with statusCode and a message, then we past it to next error middelware.
+ * @param {number} statusCode - Status Code HTTP (404)
+ * @param {String} message  - Descriptive Error Message
+ * @param {Function} next  Function next of Express to Delegate the error.
+ */
 const error=(statusCode,message, next)=>{
     const error=new Error(message);
     error.status=statusCode;

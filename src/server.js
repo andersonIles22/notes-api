@@ -4,7 +4,6 @@ const notesController=require('./controllers/notesController');
 const {validateNotePost,validateNotePut,validateId}=require('./middleware/validation');
 const {errorHandler,error}=require('./middleware/errorHandlers');
 
-
 const options={
     host:'127.0.0.1',
     port:process.env.PORT||3000
@@ -16,7 +15,7 @@ app.get('/',(req,res)=>{
     res.json({result:'waos'})
 });
 // Obtener todas los registros de la ruta
-app.get('/api/notes',notesController.getAllNotes);
+app.get('/api/notes',notesController.getAllNotes)
 
 //Obtener registros de la ruta mediante id
 app.get('/api/notes/:id',validateId,notesController.getNoteById)
