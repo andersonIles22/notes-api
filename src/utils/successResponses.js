@@ -1,4 +1,4 @@
-
+const {MESSAGES_OPERATION}=require('../constants/messages')
 
 /**
  * Send standardized response to successful reading.
@@ -11,7 +11,7 @@ const responseSuccessGet=(res,statusCode,data)=>{
     res.status(statusCode).json(
         {
           "success":true,
-          "message":"Operación Exitosa",
+          "message":MESSAGES_OPERATION.SUCCESFUL_OPERATION,
           "data":data
         }
     );
@@ -28,7 +28,7 @@ const responseSuccessPost=(res,statusCode,data)=>{
     res.status(statusCode).json(
         {
           "success":true,
-          "message":"Creación Exitosa",
+          "message":MESSAGES_OPERATION.NOTE_CREATED,
           "data":data
         }
     );
@@ -46,7 +46,7 @@ const responseSuccessPut=(res,statusCode,data)=>{
     res.status(statusCode).json(
         {
           "success":true,
-          "message":"Modificación Exitosa",
+          "message":MESSAGES_OPERATION.NOTE_UPDATED,
           "data":data
         }
     );
@@ -63,7 +63,7 @@ const responseSuccessDelete=(res,statusCode,data)=>{
     res.status(statusCode).json(
         {
           "success":true,
-          "message":"Eliminación Exitosa",
+          "message":MESSAGES_OPERATION.NOTE_DELETED,
           "data":data
         }
     );

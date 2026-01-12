@@ -1,5 +1,7 @@
 const {body,param,validationResult}=require('express-validator');
-
+const {HTTP_STATUS}=require('../constants/httpStatusCode');
+const {MESSAGES_VALIDATION}=require('../constants/messages');
+const {VALIDATION}=require('../constants/validations')
 /**
  * Rules to validating POST requests
  * Guarantee that title or content should not be empty and should be valid. And the values not should be more than 200 characters
@@ -8,12 +10,12 @@ const {body,param,validationResult}=require('express-validator');
 const validateNotePost=[
     body('title')
         .trim()
-        .notEmpty().withMessage('Title esta vacío we')
-        .isLength({max:200}).withMessage('El valor de title debe tener maximo 200 caracteres'),
+        .notEmpty().withMessage(MESSAGES_VALIDATION.TITTLE_REQUIRED)
+        .isLength({max:VALIDATION.TITLE_MAX_LENGTH}).withMessage(MESSAGES_VALIDATION.TTTLE_TOO_LONG),
     body('content')
         .trim()
-        .notEmpty().withMessage('content esta vacío we')
-        .isLength({max:200}).withMessage('El valor de content debe tener maximo 200 caracteres'),
+        .notEmpty().withMessage(MESSAGES_VALIDATION.CONTENT_REQUIRED)
+        .isLength({max:VALIDATION.TITLE_MAX_LENGTH}).withMessage(MESSAGES_VALIDATION.CONTENT_TOO_LONG),
         /**
          * Internal Middleware to verify results of Express-Validator
          * @param {Object} req - Express Request
@@ -24,7 +26,7 @@ const validateNotePost=[
     (req,res,next)=>{
         const errors=validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ 
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ 
                 success: false, 
                 errors: errors.array().map(err => ({
                 field: err.path,
@@ -46,13 +48,13 @@ const validateNotePut=[
     body('title')
         .trim()
         .optional()
-        .notEmpty().withMessage('Title esta vacío we')
-        .isLength({max:200}).withMessage('El valor de title debe tener maximo 200 caracteres'),
+        .notEmpty().withMessage(MESSAGES_VALIDATION.TITTLE_REQUIRED)
+        .isLength({max:VALIDATION.TITLE_MAX_LENGTH}).withMessage(MESSAGES_VALIDATION.TTTLE_TOO_LONG),
     body('content')
         .trim()
         .optional()
-        .notEmpty().withMessage('content esta vacío we')
-        .isLength({max:200}).withMessage('El valor de content debe tener maximo 200 caracteres'),
+        .notEmpty().withMessage(MESSAGES_VALIDATION.CONTENT_REQUIRED)
+        .isLength({max:VALIDATION.TITLE_MAX_LENGTH}).withMessage(MESSAGES_VALIDATION.CONTENT_TOO_LONG),
     /**
      * Internal Middleware to verify results of Express-Validator
      * @param {Object} req - Express Request
@@ -63,7 +65,7 @@ const validateNotePut=[
     (req,res,next)=>{
         const errors=validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ 
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ 
                 success: false, 
                 errors: errors.array().map(err => ({
                 field: err.path,
@@ -83,7 +85,7 @@ next();
  */
 const validateId=[
     param('id')
-    .isInt({min:1}).withMessage('Id debe ser positivo'),
+    .isInt({min:VALIDATION.TITLE_MIN_LENGTH}).withMessage(MESSAGES_VALIDATION.ID_POSITIVE),
     /**
      * Internal Middleware to verify results of Express-Validator
      * @param {Object} req - Express Request
@@ -94,9 +96,9 @@ const validateId=[
     (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
+      return res.status().json({ 
         success: false, 
-        error: 'Formato de ID inválido' 
+        error: MESSAGES_VALIDATION.ID_INVALID_FORMAT 
       });
     }
     next();

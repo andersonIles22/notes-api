@@ -1,3 +1,5 @@
+const {MESSAGES_OPERATION}=require('../constants/messages')
+const {HTTP_STATUS}=require('../constants/httpStatusCode')
 /**
  * Error Middleware, Centralized Error Handler.
  * @param {error} err -  Capture Error Object.
@@ -9,8 +11,8 @@ const errorHandler=(err, req, res, next)=>{
   // si queremos mostrar la linea de codigo donde empieza a fallar
   //console.error('Error:', err.stack);
   
-  const statusCode = err.status || 500;
-  const message = err.message || 'Internal server error';
+  const statusCode = err.status || HTTP_STATUS.INTERNAL_ERROR;
+  const message = err.message || MESSAGES_OPERATION.SERVER_ERROR;
   
   res.status(statusCode).json({
     success: false,
