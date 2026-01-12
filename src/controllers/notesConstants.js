@@ -6,7 +6,7 @@ const NOTES_QUERIES= Object.freeze({
     DELETE_NOTE:'DELETE FROM notes WHERE id=$1 RETURNING *'
 });
 
-const NOTES_ERRORS=({
+const NOTES_ERRORS=Object.freeze({
     ID_NOT_FOUND:"El id de la nota no existe en el sistema"
 });
 module.exports={NOTES_QUERIES,NOTES_ERRORS}
