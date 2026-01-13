@@ -7,6 +7,8 @@ const NOTES_QUERIES= Object.freeze({
 });
 
 const NOTES_ERRORS=Object.freeze({
-    ID_NOT_FOUND:"El id de la nota no existe en el sistema"
+    ID_NOT_FOUND:"The note ID was not found in the system"
 });
 module.exports={NOTES_QUERIES,NOTES_ERRORS}
+
+

@@ -7,6 +7,8 @@ const {VALIDATION}=require('../constants/validations')
  * Guarantee that title or content should not be empty and should be valid. And the values not should be more than 200 characters
  * @type {Array<Function>} 
  */
+
+
 const validateNotePost=[
     body('title')
         .trim()
@@ -94,15 +96,19 @@ const validateId=[
      * @returns  {void} just a error response to client
      */
     (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status().json({ 
-        success: false, 
-        error: MESSAGES_VALIDATION.ID_INVALID_FORMAT 
-      });
+        const errors = validationResult(req);
+    
+        if (!errors.isEmpty()) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ 
+            success: false, 
+            error: errors.array().map(err => ({
+                    field: err.path,
+                    message: err.msg
+            }))
+            })
+        }
+        next();
     }
-    next();
-  }
 ];
 
 module.exports={

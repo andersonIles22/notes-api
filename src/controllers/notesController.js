@@ -2,7 +2,7 @@
 const db=require('../config/database');
 const {successGet,successPost,successPut,successDelete}=require('../utils/successResponses');
 const {error}=require('../middleware/errorHandlers');
-const HTTP_STATUS=require('../constants/httpStatusCode');
+const {HTTP_STATUS}=require('../constants/httpStatusCode');
 const {NOTES_QUERIES,NOTES_ERRORS}=require('./notesConstants');
 
 
@@ -69,6 +69,8 @@ const createNote=async(req,res,next)=>{
  */
 
 const updateNote=async(req,res,next)=>{
+    console.log(req);
+    
     const {id}=req.params;
     const {title}=req.body;
         // Gestión de la consulta a la db
