@@ -1,4 +1,4 @@
-const express=require('express');
+const express=require('express')
 const router=express.Router();
 const notesController=require('../controllers/notesController');
 const {validateNotePost,validateNotePut,validateId}=require('../middleware/validation');
