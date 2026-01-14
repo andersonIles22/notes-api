@@ -4,7 +4,7 @@ Test-scripts.js
 Test-sql.sql
 .env.example
 delete-notes.js
-read-note.js
+read-notes.js
 seed.js
 test_connection.js
-update-note.js
+update-notes.js
