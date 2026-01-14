@@ -2,11 +2,11 @@ const express=require('express');
 const app= express();
 const notesRoutes=require('./routes/noteRoutes')
 const {errorHandler,error}=require('./middleware/errorHandlers');
-const {HTTP_STATUS,PORT}=require('./constants/httpStatusCode');
+const {HTTP_STATUS}=require('./constants/httpStatusCode');
 const {MESSAGES_OPERATION}=require('./constants/messages')
 const options={
     host:'127.0.0.1',
-    port:process.env.PORT||PORT
+    port:process.env.PORT||3000
 };
 
 app.use(express.json())

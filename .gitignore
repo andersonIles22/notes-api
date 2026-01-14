@@ -2,4 +2,9 @@
 node_modules/
 Test-scripts.js
 Test-sql.sql
-doc/
+.env.example
+delete-notes.js
+read-note.js
+seed.js
+test_connection.js
+update-note.js
